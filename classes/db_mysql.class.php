@@ -66,7 +66,7 @@ class db_mysql
     /**
      * db_mysql.class destruct.
      */
-    function __destruct ()
+    function __destruct()
     {
         $this->close();
     }
@@ -77,7 +77,7 @@ class db_mysql
      */
     public function is_connected()
     {
-        return ( $this->conn != null);
+        return ($this->conn != null);
     }
 
     /**
@@ -86,8 +86,8 @@ class db_mysql
      */
     public function connect()
     {
-        if($this->is_connected() == false){
-            $this->conn = mysql_connect($this->hostname.":".$this->port, $this->user, $this->password);
+        if ($this->is_connected() == false) {
+            $this->conn = mysql_connect($this->hostname . ":" . $this->port, $this->user, $this->password);
             mysql_select_db($this->dbname, $this->conn);
             return mysql_errno();
         }
@@ -100,7 +100,7 @@ class db_mysql
      */
     public function close()
     {
-        if($this->is_connected()){
+        if ($this->is_connected()) {
             return mysql_close($this->conn);
         }
     }
@@ -112,7 +112,7 @@ class db_mysql
      */
     public function set_charset($charset = 'utf8')
     {
-        if($this->is_connected() == false){
+        if ($this->is_connected() == false) {
             return false;
         }
         return mysql_query("set names utf8", $this->conn);
@@ -144,10 +144,10 @@ class db_mysql
     public function execute($sql)
     {
         $this->query_handle = null;
-        if($this->is_connected() == false){
+        if ($this->is_connected() == false) {
             return null;
         }
-        $this->query_handle = mysql_query( $sql, $this->conn);
+        $this->query_handle = mysql_query($sql, $this->conn);
         return $this->query_handle;
     }
 
@@ -158,8 +158,7 @@ class db_mysql
      */
     public function set_db($dbName)
     {
-        if($this->is_connected() == false)
-        {
+        if ($this->is_connected() == false) {
             return false;
         }
         $this->dbname = $dbName;
@@ -176,19 +175,20 @@ class db_mysql
      * @param string $group
      * @return array|null
      */
-    public function select($fields, $table, $where = '', $limit = '', $order = '', $group = '') {
-        $where = $where == '' ? '' : ' WHERE '.$where;
-        $order = $order == '' ? '' : ' ORDER BY '.$order;
-        $group = $group == '' ? '' : ' GROUP BY '.$group;
-        $limit = $limit == '' ? '' : ' LIMIT '.$limit;
+    public function select($fields, $table, $where = '', $limit = '', $order = '', $group = '')
+    {
+        $where = $where == '' ? '' : ' WHERE ' . $where;
+        $order = $order == '' ? '' : ' ORDER BY ' . $order;
+        $group = $group == '' ? '' : ' GROUP BY ' . $group;
+        $limit = $limit == '' ? '' : ' LIMIT ' . $limit;
 
         array_walk($fields, array($this, 'add_special_char'));
-        $field = implode (',', $fields);
-        $sql = 'SELECT '.$field.' FROM `'.$table.'`'.$where.$group.$order.$limit;
+        $field = implode(',', $fields);
+        $sql = 'SELECT ' . $field . ' FROM `' . $table . '`' . $where . $group . $order . $limit;
         $this->execute($sql);
 
         $datalist = array();
-        if($this->query_handle != null) {
+        if ($this->query_handle != null) {
             while ($row = mysql_fetch_array($this->query_handle)) {
                 $datalist[] = $row;
             }
@@ -207,22 +207,22 @@ class db_mysql
      * @param string $group
      * @return array|null
      */
-    public function select_one($fields, $table, $where = '', $limit = '', $order = '', $group = '') {
-        $where = $where == '' ? '' : ' WHERE '.$where;
-        $order = $order == '' ? '' : ' ORDER BY '.$order;
-        $group = $group == '' ? '' : ' GROUP BY '.$group;
-        $limit = $limit == '' ? '' : ' LIMIT '.$limit;
+    public function select_one($fields, $table, $where = '', $limit = '', $order = '', $group = '')
+    {
+        $where = $where == '' ? '' : ' WHERE ' . $where;
+        $order = $order == '' ? '' : ' ORDER BY ' . $order;
+        $group = $group == '' ? '' : ' GROUP BY ' . $group;
+        $limit = $limit == '' ? '' : ' LIMIT ' . $limit;
 
         array_walk($fields, array($this, 'add_special_char'));
-        $field = implode (',', $fields);
-        $sql = 'SELECT '.$field.' FROM `'.$table.'`'.$where.$group.$order.$limit;
+        $field = implode(',', $fields);
+        $sql = 'SELECT ' . $field . ' FROM `' . $table . '`' . $where . $group . $order . $limit;
         $this->execute($sql);
-        if($this->query_handle != null) {
+        if ($this->query_handle != null) {
             $datalist = mysql_fetch_array($this->query_handle);
             mysql_free_result($this->query_handle);
             return $datalist;
-        }
-        else{
+        } else {
             return array();
         }
     }
@@ -231,15 +231,16 @@ class db_mysql
      * 查询数据库，结果集行数
      * @return int
      */
-    public function select_num_rows($fields, $table, $where = '', $limit = '', $order = '', $group = '') {
-        $where = $where == '' ? '' : ' WHERE '.$where;
-        $order = $order == '' ? '' : ' ORDER BY '.$order;
-        $group = $group == '' ? '' : ' GROUP BY '.$group;
-        $limit = $limit == '' ? '' : ' LIMIT '.$limit;
+    public function select_num_rows($fields, $table, $where = '', $limit = '', $order = '', $group = '')
+    {
+        $where = $where == '' ? '' : ' WHERE ' . $where;
+        $order = $order == '' ? '' : ' ORDER BY ' . $order;
+        $group = $group == '' ? '' : ' GROUP BY ' . $group;
+        $limit = $limit == '' ? '' : ' LIMIT ' . $limit;
 
         array_walk($fields, array($this, 'add_special_char'));
-        $field = implode (',', $fields);
-        $sql = 'SELECT '.$field.' FROM `'.$table.'`'.$where.$group.$order.$limit;
+        $field = implode(',', $fields);
+        $sql = 'SELECT ' . $field . ' FROM `' . $table . '`' . $where . $group . $order . $limit;
         $this->execute($sql);
 
         return $this->query_handle ? (int)mysql_num_rows($this->query_handle)[0] : 0;
@@ -247,25 +248,26 @@ class db_mysql
 
     /**
      * 执行添加记录操作
-     * @param $data 		array,数组key为字段值,value为数据取值
-     * @param $table 		dbTable
+     * @param $data        array,数组key为字段值,value为数据取值
+     * @param $table        dbTable
      * @param $return_insert_id     boolean:ret_id
      * @param $replace       boolean:relace
      * @return boolean/int
      */
-    public function insert($data, $table, $return_insert_id = false, $replace = false) {
-        if(!is_array( $data ) || $table == '' || count($data) == 0) {
+    public function insert($data, $table, $return_insert_id = false, $replace = false)
+    {
+        if (!is_array($data) || $table == '' || count($data) == 0) {
             return false;
         }
 
         $fielddata = array_keys($data);
         $valuedata = array_values($data);
 
-        $field = implode (',', $fielddata);
-        $value = implode (',', $valuedata);
+        $field = implode(',', $fielddata);
+        $value = implode(',', $valuedata);
 
         $cmd = $replace ? 'REPLACE INTO' : 'INSERT INTO';
-        $sql = $cmd.' `'.$table.'`('.$field.') VALUES ('.$value.')';
+        $sql = $cmd . ' `' . $table . '`(' . $field . ') VALUES (' . $value . ')';
         return $return_insert_id ?
             ($this->execute($sql) ? mysql_insert_id($this->conn) : -1) :
             ($this->execute($sql));
@@ -275,8 +277,9 @@ class db_mysql
      * 获取最后一次添加记录的主键号
      * @return int
      */
-    public function get_insert_id() {
-        if($this->is_connected() == false) {
+    public function get_insert_id()
+    {
+        if ($this->is_connected() == false) {
             $this->connect();
         }
         return mysql_insert_id($this->conn);
@@ -284,48 +287,49 @@ class db_mysql
 
     /**
      * 执行更新记录操作
-     * @param $data 		要更新的数据内容，参数可以为数组也可以为字符串，建议数组。
-     * 						为数组时数组key为字段值，数组值为数据取值
-     * 						为字符串时[例：`name`='phpcms',`hits`=`hits`+1]。
-     *						为数组时[例: array('name'=>'phpcms','password'=>'123456')]
-     *						数组可使用array('name'=>'+=1', 'base'=>'-=1');程序会自动解析为`name` = `name` + 1, `base` = `base` - 1
-     * @param $table 		数据表
-     * @param $where    	更新数据时的条件
+     * @param $data        要更新的数据内容，参数可以为数组也可以为字符串，建议数组。
+     *                        为数组时数组key为字段值，数组值为数据取值
+     *                        为字符串时[例：`name`='phpcms',`hits`=`hits`+1]。
+     *                        为数组时[例: array('name'=>'phpcms','password'=>'123456')]
+     *                        数组可使用array('name'=>'+=1', 'base'=>'-=1');程序会自动解析为`name` = `name` + 1, `base` = `base` - 1
+     * @param $table        数据表
+     * @param $where        更新数据时的条件
      * @param $return_affected_rows 是否返回影响行数
      * @return boolean/int
      */
-    public function update($data, $table, $where = '', $return_affected_rows = false) {
-        if($table == '' or $where == '') {
+    public function update($data, $table, $where = '', $return_affected_rows = false)
+    {
+        if ($table == '' or $where == '') {
             return false;
         }
 
-        $where = ' WHERE '.$where;
+        $where = ' WHERE ' . $where;
         $field = '';
-        if(is_string($data) && $data != '') {
+        if (is_string($data) && $data != '') {
             $field = $data;
         } elseif (is_array($data) && count($data) > 0) {
             $fields = array();
-            foreach($data as $k=>$v) {
+            foreach ($data as $k => $v) {
                 switch (substr($v, 0, 2)) {
                     case '+=':
-                        $v = substr($v,2);
+                        $v = substr($v, 2);
                         if (is_numeric($v)) {
-                            $fields[] = $this->add_special_char($k).'='.$this->add_special_char($k).'+'.$this->escape_string($v, '', false);
+                            $fields[] = $this->add_special_char($k) . '=' . $this->add_special_char($k) . '+' . $this->escape_string($v, '', false);
                         } else {
                             continue;
                         }
 
                         break;
                     case '-=':
-                        $v = substr($v,2);
+                        $v = substr($v, 2);
                         if (is_numeric($v)) {
-                            $fields[] = $this->add_special_char($k).'='.$this->add_special_char($k).'-'.$this->escape_string($v, '', false);
+                            $fields[] = $this->add_special_char($k) . '=' . $this->add_special_char($k) . '-' . $this->escape_string($v, '', false);
                         } else {
                             continue;
                         }
                         break;
                     default:
-                        $fields[] = $this->add_special_char($k).'='.$this->escape_string($v);
+                        $fields[] = $this->add_special_char($k) . '=' . $this->escape_string($v);
                 }
             }
             $field = implode(',', $fields);
@@ -333,7 +337,7 @@ class db_mysql
             return false;
         }
 
-        $sql = 'UPDATE `'.$table.'` SET '.$field.$where;
+        $sql = 'UPDATE `' . $table . '` SET ' . $field . $where;
         return $return_affected_rows ?
             ($this->execute($sql) ? mysql_affected_rows($this->conn) : 0) :
             ($this->execute($sql));
@@ -341,28 +345,30 @@ class db_mysql
 
     /**
      * 执行删除记录操作
-     * @param $table 		数据表
-     * @param $where 		删除数据条件
+     * @param $table        数据表
+     * @param $where        删除数据条件
      * @return boolean/int
      */
-    public function delete($table, $where) {
+    public function delete($table, $where)
+    {
         if ($table == '') {
             return false;
         }
         if ($table != '') {
             $where = ' WHERE ' . $where;
         }
-        $sql = 'DELETE FROM `'.$table.'`'.$where;
+        $sql = 'DELETE FROM `' . $table . '`' . $where;
         return $this->execute($sql) ? mysql_affected_rows($this->conn) : false;
     }
 
     /**
      * 执行清空表操作，不写入log
-     * @param $table 		数据表
+     * @param $table        数据表
      * @return boolean
      */
-    public function truncate($table) {
-        return $this->execute("TRUNCATE TABLE `".$table."`");
+    public function truncate($table)
+    {
+        return $this->execute("TRUNCATE TABLE `" . $table . "`");
     }
 
     /**
@@ -371,8 +377,7 @@ class db_mysql
      */
     public function get_affected_rows()
     {
-        if($this->is_connected() == false)
-        {
+        if ($this->is_connected() == false) {
             $this->connect();
         }
         return mysql_affected_rows($this->conn);
@@ -380,26 +385,28 @@ class db_mysql
 
     /**
      * 获取数据表主键
-     * @param $table 		dbTable
+     * @param $table        dbTable
      * @return array
      */
-    public function get_primary_key($table) {
+    public function get_primary_key($table)
+    {
         $this->execute("SHOW COLUMNS FROM $table");
-        while($r = mysql_fetch_row($this->query_handle)) {
-            if($r['Key'] == 'PRI') break;
+        while ($r = mysql_fetch_row($this->query_handle)) {
+            if ($r['Key'] == 'PRI') break;
         }
         return $r['Field'];
     }
 
     /**
      * 获取表字段
-     * @param $table 		dbTable
+     * @param $table        dbTable
      * @return array
      */
-    public function get_fields($table) {
+    public function get_fields($table)
+    {
         $fields = array();
         $this->execute("SHOW COLUMNS FROM $table");
-        while($r = mysql_fetch_row($this->query_handle)) {
+        while ($r = mysql_fetch_row($this->query_handle)) {
             $fields[$r['Field']] = $r['Type'];
         }
         return $fields;
@@ -411,8 +418,7 @@ class db_mysql
      */
     public function get_db_version()
     {
-        if($this->is_connected() == false)
-        {
+        if ($this->is_connected() == false) {
             $this->connect();
         }
         return mysql_get_server_info($this->conn);
@@ -424,8 +430,7 @@ class db_mysql
      */
     public function get_db_version_int()
     {
-        if($this->is_connected() == false)
-        {
+        if ($this->is_connected() == false) {
             $this->connect();
         }
         return mysql_get_server_version($this->conn);
@@ -435,11 +440,12 @@ class db_mysql
      * 对字段两边加反引号，以保证数据库安全
      * @param $value 数组值
      */
-    public function add_special_char(&$value) {
-        if('*' == $value || false !== strpos($value, '(') || false !== strpos($value, '.') || false !== strpos ( $value, '`')) {
+    public function add_special_char(&$value)
+    {
+        if ('*' == $value || false !== strpos($value, '(') || false !== strpos($value, '.') || false !== strpos($value, '`')) {
             //不处理包含* 或者 使用了sql方法。
         } else {
-            $value = '`'.trim($value).'`';
+            $value = '`' . trim($value) . '`';
         }
         if (preg_match("/\b(select|insert|update|delete)\b/i", $value)) {
             $value = preg_replace("/\b(select|insert|update|delete)\b/i", '', $value);
@@ -453,13 +459,14 @@ class db_mysql
      * @param $key 数组key
      * @param $quotation
      */
-    public function escape_string(&$value, $key='', $quotation = 1) {
+    public function escape_string(&$value, $key = '', $quotation = 1)
+    {
         if ($quotation) {
             $q = '\'';
         } else {
             $q = '';
         }
-        $value = $q.$value.$q;
+        $value = $q . $value . $q;
         return $value;
     }
 }

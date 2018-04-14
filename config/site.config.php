@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Created by PhpStorm.
  * User: XIESHUAI
@@ -10,20 +10,18 @@ date_default_timezone_set("Asia/Shanghai");
 
 $site_config = array(
     "url" => "/",
-    "path" => "/var/www/",
-    "title" => "故宫名画记",
+    "path" => "/var/www/html/",
     "debug" => true,
 );
 $admin_config = array(
-    "url" => "/admin/",
-    "parh" => "/var/www/admin/",
-    "title" => "故宫名画记后台管理",
-    "debug" => true,
+    "url" => $site_config['url'] . "admin/",
+    "path" => $site_config['path'] . "admin/",
+    "title" => "后台管理",
+    "debug" => $site_config['debug'],
 );
 
-if($site_config['debug']) {
+if ($site_config['debug']) {
     error_reporting(E_ALL);
-}
-else{
+} else {
     error_reporting(E_ERROR);
 }
