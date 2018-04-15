@@ -6,4 +6,4 @@
  * Time: 18:50
  */
 
-include "template/index.tpl";
+include "../app/template/index.tpl";
