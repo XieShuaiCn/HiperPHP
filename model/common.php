@@ -40,10 +40,15 @@ define("USER_PERMISSION_DEVELOPER", 0x10000000);
 define("ERROR_SUCCESS", 0);
 define("ERROR_PERMISSION_DENY", 1);
 
+define("WEBSITE_CACHE_PATH", $site_config['path'] . "cache/");
+
 $_error_message = array(
     "操作成功。",
     "当前用户没有权限。"
 );
 
-
 $last_error = 0;
+
+if (!file_exists(WEBSITE_CACHE_PATH)) {
+    mkdir(WEBSITE_CACHE_PATH);
+}

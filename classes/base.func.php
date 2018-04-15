@@ -284,7 +284,7 @@ function make_url_get($arg)
  * 获取客户端IP
  * @return array|false|string
  */
-function getClientIP()
+function getClientIP($only_real = false)
 {
     if (isset($_SERVER["HTTP_X_FORWARDED_FOR"]))
         $ip = $_SERVER["HTTP_X_FORWARDED_FOR"];
@@ -300,7 +300,20 @@ function getClientIP()
         $ip = getenv("REMOTE_ADDR");
     else
         $ip = "0.0.0.0";
-    return $ip;
+    if (is_array($ip)) {
+        if ($only_real) {
+            $ip = $ip[0];
+        } else {
+            $ip = implode(",", $ip);
+        }
+    } elseif (is_string($ip)) {
+        if ($only_real && strpos($ip, ',') !== false) {
+            $ip = substr($ip, 0, strpos($ip, ','));
+        }
+    } else {
+        $ip = "";
+    }
+    return (string)$ip;
 }
 
 function &string_encode_utf8($str)

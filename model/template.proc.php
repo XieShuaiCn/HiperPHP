@@ -102,15 +102,20 @@ function template_replace_paper_iter($str_template, $paper)
  * @param integer $id 模板ID
  * @return string
  */
-function template_get_string($id)
+function template_get_string($temp)
 {
-    $str = template_get_string_by_id($id);
+    //根据参数类型选择调用
+    if (is_numeric($temp)) {
+        $str = template_get_string_by_id($temp);
+    } else {
+        $str = template_get_string_by_name($temp);
+    }
     $matches = array();
     //迭代解析嵌套模板
     while ($ret = preg_match_all("/<!--\{template.(\w*)\}-->/i", $str, $matches)) {
         //解析当前层所有模板
         for ($i = 0; $i < $ret; ++$i) {
-            $temp = template_get_string_by_name($matches[1][$i]);
+            $temp = template_get_string($matches[1][$i]);
             $str = str_ireplace($matches[0][$i], "$temp", $str);
         }
     }
