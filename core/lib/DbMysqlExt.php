@@ -8,8 +8,6 @@
 
 namespace Core\Lib;
 
-include "DbMysql.class.php";
-
 class DbMysqlExt extends DbMysql
 {
     private $sql_table = array();

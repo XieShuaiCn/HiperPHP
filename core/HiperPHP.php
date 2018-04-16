@@ -10,39 +10,57 @@ define("HIPERPHP", 1);
 
 //定义程序目录
 define("HIPER_ROOT", dirname(dirname(__FILE__)));
+define("CORE_ROOT", HIPER_ROOT . "/core");
 define("APP_ROOT", HIPER_ROOT . "/app");
 define("WEB_ROOT", HIPER_ROOT . "/web");
 define("CACHE_ROOT", HIPER_ROOT . "/cache");
 define("CONFIG_ROOT", HIPER_ROOT . "/config");
 
+include CORE_ROOT . "/module/AutoLoad.php";
+
+use Core\Module\AutoLoad;
+
 class HiperPHP
 {
     //错误号
-    private $_error_no = 0;
+    private static $_error_no = 0;
 
-    public function init()
+    public static function init()
     {
+        //基础设置
         date_default_timezone_set("Asia/Shanghai");
         ini_set('display_errors', true);
         error_reporting(E_ALL);
+        //初始化Autoload
+        AutoLoad::init();
+    }
+
+    /**
+     * 设置错误号
+     */
+    public static function setLastErrorNo($n = 0)
+    {
+        if(is_numeric($n)) {
+            self::$_error_no = $n;
+        }
     }
 
     /**
      * 获取上一次错误号
      * @return int
      */
-    public function get_last_errno()
+    public static function getLastErrorNo()
     {
-        return $this->_error_no;
+        return self::$_error_no;
     }
 
     /**
      * 获取上一次错误字符串
      * @return string
      */
-    public function get_last_error()
+    public static function getLastError()
     {
         global $error_messages;
-        return isset($error_messages[$this->_error_no]) ? $error_messages[$this->_error_no] : "NULL";
+        return isset($error_messages[self::$_error_no]) ? $error_messages[self::$_error_no] : "NULL";
     }
 }
