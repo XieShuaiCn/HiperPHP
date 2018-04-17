@@ -188,7 +188,7 @@ class DbMysqli
         }
 
         $datalist = array();
-        if (($rs = mysqli_fetch_all($this->query_handle, MYSQLI_BOTH)) != false) {
+        if (($rs = mysqli_fetch_all($this->query_handle, MYSQLI_ASSOC)) != false) {
             $datalist = $rs;
         }
         mysqli_free_result($this->query_handle);

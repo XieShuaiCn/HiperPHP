@@ -8,6 +8,11 @@
 
 namespace Core\Base;
 
+/**
+ * 控制器基类
+ * Class Controller
+ * @package Core\Base
+ */
 class Controller extends BaseObject
 {
     protected $_class_name = "Controller";

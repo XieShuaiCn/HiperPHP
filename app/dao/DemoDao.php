@@ -9,12 +9,30 @@
 namespace App\Dao;
 
 use Core\Base\Dao;
-use Core\Module\DbFactory;
 
+/**
+ * Class DemoDao
+ * @package App\Dao
+ */
 class DemoDao extends Dao
 {
     protected $_class_name = "DemoDao";
 
-    protected $tale_name = "Demo";
+    /**
+     * @var string 数据表名
+     */
+    protected $table_name = "Demo";
+
+    /**
+     * 通过名字获取一行记录
+     * @param $name
+     * @param array $fields
+     * @return array|null
+     */
+    public function selectByName($name, $fields = ['*'])
+    {
+        $where = "`name`='" . $name . "'";
+        return $this->db->doSelectOne($fields, $this->table_name, $where);
+    }
 
 }
