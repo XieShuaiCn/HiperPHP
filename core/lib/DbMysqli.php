@@ -229,14 +229,13 @@ class DbMysqli
      * 查询数据库，结果集行数
      * @return int
      */
-    public function doSelectNumRows($table, $where = '', $limit = '', $order = '', $group = '')
+    public function doSelectNumRows($table, $where = '', $group = '', $limit = '')
     {
         $where = $where == '' ? '' : ' WHERE ' . $where;
-        $order = $order == '' ? '' : ' ORDER BY ' . $order;
         $group = $group == '' ? '' : ' GROUP BY ' . $group;
         $limit = $limit == '' ? '' : ' LIMIT ' . $limit;
 
-        $sql = 'SELECT count(*) FROM `' . $table . '`' . $where . $group . $order . $limit;
+        $sql = 'SELECT count(*) FROM `' . $table . '`' . $where . $group . $limit;
         $this->doExecute($sql);
 
         return is_object($this->query_handle) ? (int)(mysqli_fetch_array($this->query_handle, MYSQLI_NUM)[0]) : 0;
@@ -244,11 +243,11 @@ class DbMysqli
 
     /**
      * 执行添加记录操作
-     * @param $data        array,数组key为字段值,value为数据取值
-     * @param $table        dbTable
-     * @param $return_insert_id     boolean:ret_id
-     * @param $replace       boolean:relace
-     * @return boolean/int
+     * @param $data
+     * @param $table
+     * @param bool $return_insert_id
+     * @param bool $replace
+     * @return bool|int
      */
     public function doInsert($data, $table, $return_insert_id = false, $replace = false)
     {
@@ -284,15 +283,15 @@ class DbMysqli
 
     /**
      * 执行更新记录操作
-     * @param $data        要更新的数据内容，参数可以为数组也可以为字符串，建议数组。
+     * @param $data string|array        要更新的数据内容，参数可以为数组也可以为字符串，建议数组。
      *                        为数组时数组key为字段值，数组值为数据取值
      *                        为字符串时[例：`name`='phpcms',`hits`=`hits`+1]。
      *                        为数组时[例: array('name'=>'phpcms','password'=>'123456')]
      *                        数组可使用array('name'=>'+=1', 'base'=>'-=1');程序会自动解析为`name` = `name` + 1, `base` = `base` - 1
-     * @param $table        数据表
-     * @param $where        更新数据时的条件
-     * @param $return_affected_rows 是否返回影响行数
-     * @return boolean/int
+     * @param $table string       数据表
+     * @param $where string        更新数据时的条件
+     * @param $return_affected_rows bool 是否返回影响行数
+     * @return boolean|int
      */
     public function doUpdate($data, $table, $where = '', $return_affected_rows = false)
     {
@@ -342,8 +341,8 @@ class DbMysqli
 
     /**
      * 执行删除记录操作
-     * @param $table        数据表
-     * @param $where        删除数据条件
+     * @param $table  string       数据表
+     * @param $where  string        删除数据条件
      * @return boolean/int
      */
     public function doDelete($table, $where)

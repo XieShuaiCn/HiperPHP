@@ -11,9 +11,20 @@ namespace Core\Module;
 use Core\Base\Factory;
 use Core\Lib\DbMysqli;
 
+/**
+ * 数据库单例工厂类
+ * Class DbFactory
+ * @package Core\Module
+ */
 class DbFactory extends Factory
 {
-    //数据库单例
+    /*
+     * @var string 类名
+     */
+    protected $_class_name = "DbFactory";
+    /**
+     * @var array 实例集合
+     */
     private static $instance = [];
 
     /**
@@ -24,7 +35,7 @@ class DbFactory extends Factory
     function getInstance($model = "default")
     {
         // TODO: Implement getInstance() method.
-        $db_config = include CONFIG_ROOT . "db.config.php";
+        $db_config = include CONFIG_ROOT . "/db.config.php";
         //单例模式
         if (isset(self::$instance[$model])) {
             $db = self::$instance[$model];
@@ -54,5 +65,15 @@ class DbFactory extends Factory
             $db_instance[$model] = $db;
         }
         return $db;
+    }
+
+    /**
+     * 创建新的数据库实例，未实现
+     * @param string $name
+     * @return DbMysqli
+     */
+    public function createInstance($name = "")
+    {
+        die("Can not create multiple db instances. use getInstance instead.");
     }
 }

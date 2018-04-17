@@ -14,4 +14,6 @@ abstract class Factory extends BaseObject
     protected $_class_name = "Factory";
 
     public abstract function getInstance();
+
+    public abstract function createInstance();
 }

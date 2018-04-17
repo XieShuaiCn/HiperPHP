@@ -8,9 +8,16 @@
 
 namespace Core\Module;
 
-
+/**
+ * 自动加载类
+ * Class AutoLoad
+ * @package Core\Module
+ */
 class AutoLoad
 {
+    /**
+     * @var array 核心类与文件的对应
+     */
     protected static $_core_class = [
         //核心类
         //"HiperPHP" => "HiperPHP.php",
@@ -30,10 +37,15 @@ class AutoLoad
         //模块功能
         //"AutoLoad" => "module/AuotLoad.php",
         "ControllerFactory" => "module/ControllerFactory.php",
+        "DaoFactory" => "module/DaoFactory.php",
         "DbFactory" => "module/DbFactory.php",
         "ModelFactory" => "module/ModelFactory.php",
+        "ViewFactory" => "module/ViewFactory.php",
     ];
 
+    /**
+     * 初始化
+     */
     public static function init()
     {
         if (false === spl_autoload_register(['Core\Module\AutoLoad', 'loadClass'])) {
@@ -41,6 +53,10 @@ class AutoLoad
         }
     }
 
+    /**
+     * 自动加载类
+     * @param $class 类名
+     */
     public static function loadClass($class)
     {
         //解析类名，提取到类名和命名空间

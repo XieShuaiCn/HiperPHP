@@ -20,11 +20,18 @@ include CORE_ROOT . "/module/AutoLoad.php";
 
 use Core\Module\AutoLoad;
 
+/**
+ * HiperPHP核心类
+ * Class HiperPHP
+ */
 class HiperPHP
 {
     //错误号
     private static $_error_no = 0;
 
+    /**
+     * 初始化
+     */
     public static function init()
     {
         //基础设置

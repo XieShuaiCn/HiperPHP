@@ -8,29 +8,62 @@
 
 namespace Core\Module;
 
-
+use Core\Base\Dao;
 use Core\Base\Factory;
 
+/**
+ * 数据访问对象单例工厂类
+ * Class DaoFactory
+ * @package Core\Module
+ */
 class DaoFactory extends Factory
 {
+    /**
+     * @var string 类名
+     */
     protected $_class_name = "DaoFactory";
 
+    /**
+     * @var array 实例集合
+     */
     protected static $instance = [];
 
+    /**
+     * 获取实例
+     * @param string $name
+     * @return Dao
+     */
     public function  getInstance($name = "")
     {
         // TODO: Implement getInstance() method.
-        if (!isset(self::$instance[$name]) || !(self::$instance[$name] instanceof Model)) {
+        if (!isset(self::$instance[$name]) || !(self::$instance[$name] instanceof Dao)) {
             //组合全称
             $full_name = "\\APP\\Dao\\" . $name . "Dao";
             try {
-                $model = new $full_name();
+                $dao = new $full_name();
             } catch (\Exception $e) {
                 die($e->getMessage());
             }
             //记录实例
-            self::$instance[$name] = $model;
+            self::$instance[$name] = $dao;
         }
         return self::$instance[$name];
+    }
+
+    /**
+     * 创建新的数据访问对象实例，
+     * @param string $name
+     * @return Dao
+     */
+    public function createInstance($name = "")
+    {
+        //组合全称
+        $full_name = "\\APP\\Dao\\" . $name . "Dao";
+        try {
+            $dao = new $full_name();
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+        return $dao;
     }
 }

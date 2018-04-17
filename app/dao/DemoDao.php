@@ -9,8 +9,12 @@
 namespace App\Dao;
 
 use Core\Base\Dao;
+use Core\Module\DbFactory;
 
 class DemoDao extends Dao
 {
+    protected $_class_name = "DemoDao";
+
+    protected $tale_name = "Demo";
 
 }
