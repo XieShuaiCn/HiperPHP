@@ -69,29 +69,41 @@ class AutoLoad
             $class_namespace = substr($class, 0, $class_name_index);
         }
         //判断是否为核心类
+        $find_file = false;
         if (isset(self::$_core_class[$class_name])) {
             $file = CORE_ROOT . "/" . self::$_core_class[$class_name];
-        } else {
-            //优先根据命名控件解析
-            if (strlen($class_namespace) > 0) {
-                $class_path = str_replace("\\", "/", strtolower($class_namespace));
-                $file = HIPER_ROOT . "/" . $class_path . "/" . $class_name . ".php";
+            if (file_exists($file)) {
+                $find_file = true;
+            }
+        }
+        //优先根据命名控件解析
+        if ($find_file == false && strlen($class_namespace) > 0) {
+            $class_path = str_replace("\\", "/", strtolower($class_namespace));
+            $file = HIPER_ROOT . "/" . $class_path . "/" . $class_name . ".php";
+            if (file_exists($file)) {
+                $find_file = true;
+            }
+        }
+        //根据类名解析路径
+        if ($find_file == false) {
+            if (substr($class_name, -10) == "Controller") {
+                $file = APP_ROOT . "/controller/" . $class_name . ".php";
+            } elseif (substr($class_name, -3) == "Dao") {
+                $file = APP_ROOT . "/dao/" . $class_name . ".php";
+            } elseif (substr($class_name, -5) == "Model") {
+                $file = APP_ROOT . "/model/" . $class_name . ".php";
+            } elseif (substr($class_name, -4) == "View") {
+                $file = APP_ROOT . "/view/" . $class_name . ".php";
             } else {
-                //根据类名解析路径
-                if (substr($class_name, -10) == "Controller") {
-                    $file = APP_ROOT . "/controller/" . $class_name . ".php";
-                } elseif (substr($class_name, -3) == "Dao") {
-                    $file = APP_ROOT . "/dao/" . $class_name . ".php";
-                } elseif (substr($class_name, -5) == "Model") {
-                    $file = APP_ROOT . "/model/" . $class_name . ".php";
-                } elseif (substr($class_name, -4) == "View") {
-                    $file = APP_ROOT . "/view/" . $class_name . ".php";
-                } else {
-                    $file = APP_ROOT . $class_name . ".php";
-                }
+                $file = APP_ROOT . $class_name . ".php";
+            }
+            if (file_exists($file)) {
+                $find_file = true;
             }
         }
         //引入文件
-        include $file;
+        if ($find_file) {
+            include $file;
+        }
     }
 }
