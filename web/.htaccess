@@ -1,0 +1,8 @@
+RewriteEngine On
+RewriteBase / 
+
+#重定向入口，匹配非index.php和文件目录不存在的访问
+RewriteCond %{REQUEST_URI} !^/index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^/(.*)$ /index.php/$1 [R=301,L]

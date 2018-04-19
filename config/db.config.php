@@ -15,7 +15,7 @@ return [
         "hostname" => "localhost",
         "user" => "hiperphp",
         "password" => "hiper123",
-        "dbname" => "hiperphp",
+        "dbname" => "HiperPHP",
         "port" => "3306",
         "charset" => "utf8"
     ]

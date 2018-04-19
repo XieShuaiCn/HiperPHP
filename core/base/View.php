@@ -20,7 +20,7 @@ class View extends BaseObject
     /**
      * 显示页面内容
      */
-    public function display()
+    public function display($response)
     {
         die("404:" . $this->toString());
     }

@@ -13,7 +13,9 @@ namespace Core\Base;
  * Class Controller
  * @package Core\Base
  */
-class Controller extends BaseObject
+abstract class Controller extends BaseObject
 {
     protected $_class_name = "Controller";
+
+    public abstract function handle($func, $request, $response);
 }

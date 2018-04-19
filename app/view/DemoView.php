@@ -35,13 +35,13 @@ class DemoView extends View
     /**
      * 显示页面
      */
-    public function display()
+    public function display($response)
     {
         $content = <<<EOF
 <html><head><title>{TITLE}</title></head><body>{CONTENT}</body></html>
 EOF;
         $html = str_replace("{TITLE}", $this->data['name'], $content);
         $html = str_replace("{CONTENT}", $this->data['value'], $html);
-        echo $html;
+        $response->setContent($html);
     }
 }

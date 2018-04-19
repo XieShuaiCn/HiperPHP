@@ -20,10 +20,16 @@ class DemoController extends Controller
 {
     protected $_class_name = 'DemoController';
 
+    public function handle($func, $request, $response)
+    {
+        // TODO: Implement handle() method.
+        $this->$func($request, $response);
+    }
+
     /**
      * 接收主页
      */
-    public function index()
+    public function index($request, $reponse)
     {
         $f = new ModelFactory();
         $m = $f->createInstance("Demo");
@@ -31,6 +37,6 @@ class DemoController extends Controller
         $f2 = new ViewFactory();
         $v = $f2->createInstance("Demo");
         $v->setData($m->toArray());
-        $v->display();
+        $v->display($reponse);
     }
 }

@@ -40,6 +40,9 @@ class AutoLoad
         "DaoFactory" => "module/DaoFactory.php",
         "DbFactory" => "module/DbFactory.php",
         "ModelFactory" => "module/ModelFactory.php",
+        "Request" => "module/Request.php",
+        "Response" => "module/Response.php",
+        "Router" => "module/Router.php",
         "ViewFactory" => "module/ViewFactory.php",
     ];
 
