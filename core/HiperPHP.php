@@ -106,7 +106,7 @@ class HiperPHP
 
     public static function config($key)
     {
-        return isset(self::$_config[$key]) ?: null;
+        return isset(self::$_config[$key]) ? self::$_config[$key] : null;
     }
 
     /**

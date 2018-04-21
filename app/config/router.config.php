@@ -9,6 +9,9 @@
 return [
     "default" => ["Demo", "index"],
     "/index" => [
+        "default" => ["Demo", "index"],
         "Demo" => ["Demo", "index"],
+        "Demo/:any" => ["Demo", "index2"],
+        "#^Demo/(\d+)/([^/:]+)$#" => ["Demo", "index3"],
     ]
 ];
