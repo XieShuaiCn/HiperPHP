@@ -8,14 +8,33 @@
 
 namespace Core\Module;
 
-
+/**
+ * 用户请求类
+ * Class Request
+ * @package Core\Module
+ */
 class Request
 {
+    /**
+     * @var string 请求类型
+     */
     private $method = "GET";
+    /**
+     * @var array|string 请求的语言
+     */
     private $language = "zh-CN";
+    /**
+     * @var null|string 请求的模块，访问入口文件名
+     */
     private $module = null;
+    /**
+     * @var array 路由获取的参数
+     */
     private $router_args = [];
 
+    /**
+     * Request constructor.
+     */
     public function __construct()
     {
         $this->language = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
@@ -25,16 +44,29 @@ class Request
         }
     }
 
+    /**
+     * @return null|string 获取访问文件名，不含php扩展名
+     */
     public function getModule()
     {
         return $this->module;
     }
 
+    /**
+     * 获取访问的脚本文件
+     * @param bool $full_path 是否返回全路径
+     * @return string
+     */
     public function getScriptFile($full_path = false)
     {
         return $full_path ? $_SERVER['SCRIPT_FILENAME'] : $_SERVER['SCRIPT_NAME'];
     }
 
+    /**
+     * 获取POST参数
+     * @param null $key 参数为null时，返回所有参数
+     * @return string|array
+     */
     public function getPostArgs($key = null)
     {
         if ($key === null) {
@@ -43,6 +75,11 @@ class Request
         return isset($_POST[$key]) ? $_POST[$key] : null;
     }
 
+    /**
+     * 获取URL参数
+     * @param null $key 参数为null时，返回所有值
+     * @return string|array
+     */
     public function getUrlArgs($key = null)
     {
         if ($key === null) {
@@ -51,6 +88,24 @@ class Request
         return isset($_GET[$key]) ? $_GET[$key] : null;
     }
 
+    /**
+     * 获取访问Server资源的参数
+     * @param null $key string 参数为null时，返回所有参数
+     * @return string|array
+     */
+    public function getServerArgs($key=null)
+    {
+        if($key == null){
+            return $_SERVER;
+        }
+        return isset($_SERVER[$key]) ? $_SERVER[$key] : null;
+    }
+
+    /**
+     * 设置路由参数
+     * @param $key string|array 参数名，或参数数组
+     * @param string $value 参数值
+     */
     public function setRouterArgs($key, $value = "")
     {
         if (is_array($key)) {
@@ -60,6 +115,11 @@ class Request
         }
     }
 
+    /**
+     * 获取路由参数
+     * @param null $key 参数为null时，返回所有参数
+     * @return array|mixed|null
+     */
     public function getRouterArgs($key = null)
     {
         if ($key === null) {
@@ -68,11 +128,19 @@ class Request
         return isset($this->router_args[$key]) ? $this->router_args[$key] : null;
     }
 
+    /**
+     * 获取Pathinfo信息
+     * @return string|null
+     */
     public function getPathInfo()
     {
         return isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : null;
     }
 
+    /**
+     * 是否为Https请求
+     * @return bool
+     */
     public function isHttps()
     {
         return isset($_SERVER['REQUEST_SCHEME']) ? ($_SERVER['REQUEST_SCHEME'] == "https") : false;

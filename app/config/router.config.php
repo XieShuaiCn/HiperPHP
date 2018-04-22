@@ -1,17 +1,21 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: XIESHUAI
- * Date: 2018/4/18
- * Time: 20:15
+ * URL路由配置文件，不启用URL路由时，可以忽略
  */
-
 return [
+    //规则：“#”包围的为使用正则表达式匹配，“:any”为匹配除‘/’外的任意字符
+    //      “:num”为匹配数字，“:word”：为匹配字母
+    //转向：第一项为控制器名，第二项为调用的方法
+    //      或第一项为网址，第二项为重定向代码，默认为302
+    //默认路由规则
     "default" => ["Demo", "index"],
+    //访问入口模块，也可以理解为路由的分组，开发时比较灵活
     "/index" => [
+        //默认模块入口，匹配不到时，使用此规则
         "default" => ["Demo", "index"],
         "Demo" => ["Demo", "index"],
         "Demo/:any" => ["Demo", "index2"],
         "#^Demo/(\d+)/([^/:]+)$#" => ["Demo", "index3"],
+        "Search" => ["http://www.baidu.com"],
     ]
 ];
