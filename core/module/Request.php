@@ -32,6 +32,9 @@ class Request
      */
     private $router_args = [];
 
+    private $_session = null;
+    private $_cookie = null;
+
     /**
      * Request constructor.
      */
@@ -99,6 +102,70 @@ class Request
             return $_SERVER;
         }
         return isset($_SERVER[$key]) ? $_SERVER[$key] : null;
+    }
+
+    /**
+     * 获取session管理器
+     * @return Session
+     */
+    public function getSession()
+    {
+        if($this->_session == null){
+            $this->_session = new Session();
+        }
+        return $this->_session;
+    }
+
+    /**
+     * 获取指定session值
+     * @param string $key
+     * @return null|string
+     */
+    public function getSessionArgs($key)
+    {
+        return $this->getSession()->getValue($key);
+    }
+
+    /**
+     * 设置session值
+     * @param string $key
+     * @param string $value
+     */
+    public function setSessionArg($key, $value)
+    {
+        $this->getSession()->setValue($key, $value);
+    }
+
+    /**
+     * 获取cookie管理器
+     * @return Cookie|null
+     */
+    public function getCookie()
+    {
+        if($this->_cookie == null){
+            $this->_cookie = new Cookie();
+        }
+        return $this->_cookie;
+    }
+
+    /**
+     * 获取指定cookie值
+     * @param string $key
+     * @return null|string
+     */
+    public function getCookieArgs($key)
+    {
+        return $this->getCookie()->getValue($key);
+    }
+
+    /**
+     * 设置cookie值
+     * @param $key
+     * @param string $value
+     */
+    public function setCookieArg($key, $value="")
+    {
+        $this->getCookie()->setValue($key, $value);
     }
 
     /**

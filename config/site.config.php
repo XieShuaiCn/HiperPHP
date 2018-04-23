@@ -24,4 +24,7 @@ return [
 
     //默认处理控制器，推荐设置，在没有处理规则时调用
     'default_controller' => \App\Controller\DemoController::class,
+
+    //cookie有效期，2小时
+    'cookie_expire' => 7200,
 ];
