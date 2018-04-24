@@ -100,9 +100,10 @@ class Cookie
      * 设置cookie值
      * @param $key string cookie名称
      * @param $value string cookie值
+     * @param $urlencode bool 是否编码
      * @return Cookie $this 返回自身
      */
-    public function setValue($key, $value = "")
+    public function setValue($key, $value = "", $urlencode = true)
     {
         //非0数字，则视为有效时长，0表示只用浏览器关闭永久有效，其他则视为有效到固定时间的字符串表示。
         if(is_numeric($this->expire) && $this->expire != 0) {
@@ -112,7 +113,12 @@ class Cookie
             $time = $this->expire;
         }
         //设置cookie
-        setcookie($key, $value, $time, $this->path, $this->domain, $this->secure, $this->httponly);
+        if($urlencode) {
+            setcookie($key, $value, $time, $this->path, $this->domain, $this->secure, $this->httponly);
+        }
+        else {
+            setrawcookie($key, $value, $time, $this->path, $this->domain, $this->secure, $this->httponly);
+        }
         return $this;
     }
 

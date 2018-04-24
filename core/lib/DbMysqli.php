@@ -28,7 +28,7 @@ class DbMysqli
     private $sql = "";
 
     /**
-     * db_mysqli.class constructor.
+     * DbMysqli constructor.
      * @param $host
      * @param $user
      * @param string $passwd
@@ -47,7 +47,7 @@ class DbMysqli
     }
 
     /**
-     * db_mysqli.class destruct.
+     * DbMysqli destruct.
      */
     function __destruct()
     {
@@ -86,6 +86,7 @@ class DbMysqli
         if ($this->isConnected()) {
             return mysqli_close($this->conn);
         }
+        return true;
     }
 
     /**
@@ -122,7 +123,7 @@ class DbMysqli
     /**
      * 执行SQL语句
      * @param $sql
-     * @return bool|mysqli_result|null
+     * @return bool|\mysqli_result|null
      */
     public function doExecute($sql)
     {
@@ -359,7 +360,7 @@ class DbMysqli
 
     /**
      * 执行清空表操作，不写入log
-     * @param $table        数据表
+     * @param $table string  数据表
      * @return boolean
      */
     public function doTruncate($table)
@@ -397,7 +398,7 @@ class DbMysqli
 
     /**
      * 保存一个还原点
-     * @param $name 还原点名称
+     * @param $name string 还原点名称
      * @return bool 保存成功
      * @since 5.5.0
      */
@@ -453,7 +454,7 @@ class DbMysqli
 
     /**
      * 获取数据表主键
-     * @param $table        dbTable
+     * @param $table string dbTable
      * @return array
      */
     public function getPrimaryKey($table)
@@ -467,7 +468,7 @@ class DbMysqli
 
     /**
      * 获取表字段
-     * @param $table        dbTable
+     * @param $table string dbTable
      * @return array
      */
     public function getTableFields($table)
@@ -506,7 +507,7 @@ class DbMysqli
 
     /**
      * 对字段两边加反引号，以保证数据库安全
-     * @param &$value 数组值(地址引用)
+     * @param &$value string 数组值(地址引用)
      */
     public function addSpecialChar(&$value)
     {
@@ -523,16 +524,14 @@ class DbMysqli
 
     /**
      * 对字段值两边加引号，以保证数据库安全
-     * @param &$value 数组值(地址引用)
-     * @param $key 键名，array_walk时必须的参数
+     * @param &$value string 数组值(地址引用)
+     * @param $key string 键名，array_walk时必须的参数
      * @param bool $quotation 是否转义
      */
     public function escapeString(&$value, $key = "", $quotation = true)
     {
         if ($quotation) {
             $value = "'" . $value . "'";
-        } else {
-
         }
         return $value;
     }
