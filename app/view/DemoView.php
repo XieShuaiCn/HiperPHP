@@ -9,6 +9,7 @@
 namespace App\View;
 
 use Core\Base\View;
+use Core\Module\CacheFactory;
 
 /**
  * Class DemoView
@@ -30,10 +31,9 @@ class DemoView extends View
      */
     public function setData($value, $key = null)
     {
-        if($key == null && is_array($value)) {
+        if ($key == null && is_array($value)) {
             $this->data = array_merge($this->data, $value);
-        }
-        else{
+        } else {
             $this->data[$key] = $value;
         }
     }
@@ -43,14 +43,24 @@ class DemoView extends View
      */
     public function display($response)
     {
+        $cache_key = $this->_class_name
+            . (isset($this->data['arg_id']) ? "_" . $this->data['arg_id'] : "")
+            . (isset($this->data['arg_name']) ? "_" . $this->data['arg_name'] : "");
+        $f = new CacheFactory();
+        $cache = $f->getInstance('core');
+        if($html = $cache->getValue($cache_key)){
+            $response->setContent($html);
+            return;
+        }
         $html = <<<EOF
 <html><head><title>{TITLE}</title></head><body>{CONTENT}</body></html>
 EOF;
         $html = str_replace("{TITLE}", $this->data['name'], $html);
-        $content = isset($this->data['value'])?$this->data['value']."<br>":"";
-        $content .= isset($this->data['arg_id'])?"ID：".$this->data['arg_id']."<br>":"";
-        $content .= isset($this->data['arg_name'])?"Name：".$this->data['arg_name']."<br>":"";
+        $content = isset($this->data['value']) ? $this->data['value'] . "<br>" : "";
+        $content .= isset($this->data['arg_id']) ? "ID：" . $this->data['arg_id'] . "<br>" : "";
+        $content .= isset($this->data['arg_name']) ? "Name：" . $this->data['arg_name'] . "<br>" : "";
         $html = str_replace("{CONTENT}", $content, $html);
         $response->setContent($html);
+        $cache->setValue($cache_key, $html);
     }
 }

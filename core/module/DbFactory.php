@@ -54,10 +54,10 @@ class DbFactory extends Factory
                             $db->setCharset($db_config[$model]["charset"]);
                         }
                     } else {
-                        die("cannot connect to database:(" . $ret . ',' . mysqli_connect_errno() . "):" . mysqli_connect_error());
+                        die("Cannot connect to database:(" . $ret . ',' . mysqli_connect_errno() . "):" . mysqli_connect_error());
                     }
                 } else {
-                    die("cannot get the instance of database");
+                    die("Cannot get the instance of database");
                 }
             } catch (\Exception $e) {
                 die($e->getMessage());
@@ -70,10 +70,9 @@ class DbFactory extends Factory
     /**
      * 创建新的数据库实例，未实现
      * @param string $name
-     * @return DbMysqli
      */
     public function createInstance($name = "")
     {
-        die("Can not create multiple db instances. use getInstance instead.");
+        die("Can not create multiple db instances. Use getInstance instead.");
     }
 }

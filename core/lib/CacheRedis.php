@@ -8,12 +8,14 @@
 
 namespace Core\Lib;
 
+use \Core\Base\Cache;
+
 /**
  * Redis缓存类
  * Class CacheRedis
  * @package Core\Lib
  */
-class CacheRedis
+class CacheRedis extends Cache
 {
     /**
      * @var null|\Redis
@@ -46,9 +48,17 @@ class CacheRedis
 
     /**
      * CacheRedis constructor. null for default.
+     * @param null $host
+     * @param null $port
+     * @param null $password
+     * @param null $timeout
+     * @param null $retry_time
      */
     public function __construct($host = null, $port = null, $password = null, $timeout = null, $retry_time = null)
     {
+        if (!class_exists('\Redis')) {
+            die('You have not installed Redis.');
+        }
         $this->_redis = new \Redis();
         if ($host !== null) {
             $this->host = $host;
@@ -65,6 +75,7 @@ class CacheRedis
         if ($retry_time !== null) {
             $this->retry_interval = $retry_time;
         }
+        $this->connect();
     }
 
     /**
@@ -72,7 +83,9 @@ class CacheRedis
      */
     public function __destruct()
     {
-        $this->_redis->close();
+        if ($this->isConnected()) {
+            $this->_redis->close();
+        }
     }
 
     /**
@@ -99,14 +112,18 @@ class CacheRedis
     public function connect()
     {
         if ($this->isConnected() === false) {
-            $suss = $this->_redis->connect($this->host, $this->port, $this->timeout, $this->reserved, $this->retry_interval);
-            //设置了密码则需要验证
-            if ($this->password !== null) {
-                $suss &= $this->_redis->auth($this->password);
+            try {
+                $suss = $this->_redis->connect($this->host, $this->port, $this->timeout, $this->reserved, $this->retry_interval);
+                //设置了密码则需要验证
+                if ($this->password !== null) {
+                    $suss &= $this->_redis->auth($this->password);
+                }
+                //必须开启序列化，否则数组和对象等将不能存储数据
+                $suss &= $this->_redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
+                return $suss;
+            } catch (\Exception $e) {
+                die($e->getMessage());
             }
-            //必须开启序列化，否则数组和对象等将不能存储数据
-            $suss &= $this->_redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
-            return $suss;
         }
         return true;
     }
@@ -149,38 +166,26 @@ class CacheRedis
      */
     public function getValue($key)
     {
-        $available = $this->_redis->get($key . '_available');
-        if ($available) {
-            return $this->_redis->get($key);
-        } else {
-            return $available;
-        }
+        return $this->_redis->get($key);
     }
 
     /**
      * 设置新的键值
-     * @param $key
+     * @param $key string
      * @param $value
+     * @param $expire int
      * @return bool
      */
-    public function setValue($key, $value)
+    public function setValue($key, $value, $expire = 0)
     {
         //多条命令，一次提交
         $ret = $this->_redis->multi()
-            ->set($key, $value)
-            ->set($key . '_available', true);
+            ->set($key, $value);
+        if ($expire !== 0) {
+            $ret = $ret->expire($key, $expire);
+        }
         $ret = $ret->exec();
-        return $ret[0] && $ret[1];
-    }
-
-    /**
-     * 使某个键值失效，可用于lazy-load模式
-     * @param $key
-     * @return bool
-     */
-    public function disableValue($key)
-    {
-        return $this->_redis->set($key . '_available', false);
+        return $ret[0] && ($expire === 0 ?: $ret[1]);
     }
 
     /**
@@ -190,19 +195,20 @@ class CacheRedis
      */
     public function deleteValue($key)
     {
-        return $this->_redis->del($key . '_available', $key) == 2;
+        return $this->_redis->del($key) > 0;
     }
 
     /**
      * 设置hash值
-     * @param $name
-     * @param $key
+     * @param $name string
+     * @param $key string
      * @param $value
+     * @param 0 $expire int
      * @return bool
      */
-    public function setHashValue($name, $key, $value)
+    public function setHashValue($name, $key, $value, $expire = 0)
     {
-        return $this->_redis->hMSet($name, [$key . '_available' => true, $key => $value]);
+        return $this->_redis->hSet($name, $key, $value);
     }
 
     /**
@@ -213,23 +219,7 @@ class CacheRedis
      */
     public function getHashValue($name, $key)
     {
-        $ret = $this->_redis->hGet($name, $key . '_available');
-        if ($ret) {
-            return $this->_redis->hGet($name, $key);
-        } else {
-            return $ret;
-        }
-    }
-
-    /**
-     * 使某个键值失效，可用于lazy-load模式
-     * @param $name string hash组名
-     * @param $key string hash键名
-     * @return bool
-     */
-    public function disableHashValue($name, $key)
-    {
-        return $this->_redis->hset($name, $key . '_available', false);
+        return $this->_redis->hGet($name, $key);
     }
 
     /**
@@ -240,7 +230,25 @@ class CacheRedis
      */
     public function deleteHashValue($name, $key)
     {
-        return $this->_redis->hDel($name, $key . '_available', $key) == 2;
+        return $this->_redis->hDel($name, $key) > 0;
+    }
+
+    /**
+     * 获取所有键名
+     * @param string $pattern
+     */
+    public function getKeysAll($pattern = '*')
+    {
+        return $this->_redis->keys($pattern);
+    }
+
+    /**
+     * 获取所有hash键名
+     * @param string $name hash组名
+     */
+    public function getHashKeysAll($name)
+    {
+        return $this->_redis->hKeys($name);
     }
 
     /**

@@ -8,62 +8,174 @@
 
 namespace Core\Lib;
 
-class CacheLocal
+use Core\Base\Cache;
+
+class CacheLocal extends Cache
 {
-    public function __construct()
+    private $path = '.';
+
+    public function __construct($path = null)
     {
-        if (!is_dir(CACHE_ROOT)) {
-            mkdir(CACHE_ROOT);
+        if ($path !== null) {
+            $this->path = $path;
+        }
+        var_dump($this->path);
+        if (!is_dir($this->path)) {
+            if (false == mkdir($this->path)) {
+                die('fail to make directory of cache.');
+            }
         }
     }
 
+    /**
+     * 获取键值
+     * @param string $key
+     * @return bool|string
+     */
     public function getValue($key)
     {
-        $file = CACHE_ROOT . "/" . $key . ".tmp";
+        $file = $this->path . "/" . $key . ".tmp";
         if (is_file($file)) {
-            $data = file_get_contents($file);
-            $index = strpos($data, "|");
-            //var_dump($data, $index);
-            if ($index === false) {
-                unlink($file);
-                return false;
-            }
-            $expire = substr($data, 0, $index);
-            if ($expire > time()) {
-                return substr($data, $index + 1);
-            } else {
-                unlink($file);
+            try {
+                //$f = fopen($file, 'rb');
+                //$data = fread($f, 0xFFFF);
+                //fclose($f);
+                $data = file_get_contents($file);
+                $index = strpos($data, '|');
+                if ($index === false) {
+                    unlink($file);
+                    return false;
+                }
+                $expire = unserialize(substr($data, 0, $index));
+                if ($expire > time()) {
+                    $data = unserialize(substr($data, $index + 1));
+                    return $data;
+                } else {
+                    unlink($file);
+                    return false;
+                }
+            } catch (\Exception $e) {
                 return false;
             }
         }
         return false;
     }
 
-    public function setValue($key, $value, $expire = 0xFFFFFFFF)
+    /**
+     * 设置键值
+     * @param $key string
+     * @param $value mixed
+     * @param int $expire
+     * @return bool
+     */
+    public function setValue($key, $value, $expire = 0)
     {
-        $file = CACHE_ROOT . "/" . $key . ".tmp";
-        //时间戳|数据
-        $data = ($expire == 0xFFFFFFFF ? $expire : (string)((int)$expire + time()));
-        $data .= "|";
-        $data .= $value;
-        return 0 < file_put_contents($file, $data);
-    }
-
-    public function getArray($key)
-    {
-        $value = self::getValue($key);
-        if ($value === false) {
+        $file = $this->path . "/" . $key . ".tmp";
+        $expire = $expire == 0 ? 0xFFFFFFFF : ((int)$expire + time());
+        //var_dump($file);
+        try {
+            //$f = fopen($file, 'wb');
+            $data = serialize($expire) . '|';
+            $data .= serialize($value);
+            return file_put_contents($file, $data);
+            //fwrite($f, $data);
+            //fclose($f);
+            //return true;
+        } catch (\Exception $e) {
             return false;
         }
-        $arr = json_decode($value);
-        return $arr;
     }
 
-    public function setArray($key, $value, $expire = 0xFFFFFFFF)
+    /**
+     * 删除键值
+     * @param $key string
+     * @return bool
+     */
+    public function deleteValue($key)
+    {
+        try {
+            return
+                file_exists($this->path . "/" . $key . ".tmp") ?
+                    unlink($this->path . "/" . $key . ".tmp") :
+                    true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * 获取hash键值
+     * @param $name
+     * @param $key
+     * @return bool|mixed
+     */
+    public function getHashValue($name, $key)
+    {
+        return self::getValue($name . '_' . $key);
+    }
+
+    /**
+     * 设置hash键值
+     * @param $name string
+     * @param $key string
+     * @param $value mixed
+     * @param int $expire
+     * @return bool
+     */
+    public function setHashValue($name, $key, $value, $expire = 0)
     {
         if (is_array($value)) {
-            return self::setValue($key, json_encode($value), $expire);
+            return self::setValue($name . '_' . $key, $value, $expire);
         }
         return false;
+    }
+
+    /**
+     * 删除hash键值
+     * @param $name string
+     * @param $key string
+     * @return bool
+     */
+    public function deleteHashValue($name, $key)
+    {
+        return $this->deleteValue($name . '_' . $key);
+    }
+
+    /**
+     * 获取所有键名
+     * @param string $pattern
+     * @return array
+     */
+    public function getKeysAll($pattern = '*')
+    {
+        $list = scandir($this->path);
+        $ret = [];
+        if ($pattern != null && $pattern != '*') {
+            $ptn = str_replace('*', '\w*?', $pattern);
+            $ptn = '/' . $ptn . '/';
+            var_dump($ptn);
+            foreach ($list as $l) {
+                if (substr($l, -4) == '.tmp' && preg_match($ptn, $l)) {
+                    array_push($ret, $l);
+                }
+            }
+        } else {
+            foreach ($list as $l) {
+                if (substr($l, -4) == '.tmp') {
+                    array_push($ret, $l);
+                }
+            }
+        }
+        return $ret;
+    }
+
+    /**
+     * 获取所有键名
+     * @param string $name
+     * @return array
+     */
+    public function getHashKeysAll($name)
+    {
+        return $this->getKeysAll($name . "_*");
     }
 }
