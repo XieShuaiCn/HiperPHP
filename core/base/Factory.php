@@ -15,17 +15,24 @@ namespace Core\Base;
  */
 abstract class Factory extends BaseObject
 {
+    protected static $class_name = "Factory";
     protected $_class_name = "Factory";
 
     /**
      * 获取单例
      * @return mixed
      */
-    public abstract function getInstance();
+    public static function getInstance()
+    {
+        die("Have not override the '" . self::$class_name . "::getInstance' method.");
+    }
 
     /**
      * 创建实例
      * @return mixed
      */
-    public abstract function createInstance();
+    public static function createInstance()
+    {
+        die("Have not override the '" . self::$class_name . "::createInstance' method.");
+    }
 }

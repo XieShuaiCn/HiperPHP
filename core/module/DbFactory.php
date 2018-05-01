@@ -21,6 +21,7 @@ class DbFactory extends Factory
     /*
      * @var string 类名
      */
+    protected static $class_name = "DbFactory";
     protected $_class_name = "DbFactory";
     /**
      * @var array 实例集合
@@ -32,7 +33,7 @@ class DbFactory extends Factory
      * @param string $model
      * @return DbMysqli
      */
-    function getInstance($model = "default")
+    public static function getInstance($model = "default")
     {
         // TODO: Implement getInstance() method.
         $db_config = include CONFIG_ROOT . "/db.config.php";
@@ -71,7 +72,7 @@ class DbFactory extends Factory
      * 创建新的数据库实例，未实现
      * @param string $name
      */
-    public function createInstance($name = "")
+    public static function createInstance($name = "")
     {
         die("Can not create multiple db instances. Use getInstance instead.");
     }

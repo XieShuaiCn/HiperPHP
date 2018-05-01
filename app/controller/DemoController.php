@@ -35,11 +35,9 @@ class DemoController extends Controller
      */
     public function index($request, $reponse)
     {
-        $f = new ModelFactory();
-        $m = $f->createInstance("Demo");
+        $m = ModelFactory::createInstance("Demo");
         $m->load(1);
-        $f2 = new ViewFactory();
-        $v = $f2->createInstance("Demo");
+        $v = ViewFactory::createInstance("Demo");
         $v->setData($m->toArray());
         $v->display($reponse);
     }
@@ -49,11 +47,9 @@ class DemoController extends Controller
      */
     public function index2($request, $reponse)
     {
-        $f = new ModelFactory();
-        $m = $f->createInstance("Demo");
+        $m = ModelFactory::createInstance("Demo");
         $m->load(1);
-        $f2 = new ViewFactory();
-        $v = $f2->createInstance("Demo");
+        $v = ModelFactory::createInstance("Demo");
         $v->setData($m->toArray());
         $v->setData($request->getRouterArgs(1), 'arg_name');
         $v->display($reponse);
@@ -65,11 +61,9 @@ class DemoController extends Controller
      */
     public function index3($request, $reponse)
     {
-        $f = new ModelFactory();
-        $m = $f->createInstance("Demo");
+        $m = ModelFactory::createInstance("Demo");
         $m->load(1);
-        $f2 = new ViewFactory();
-        $v = $f2->createInstance("Demo");
+        $v = ViewFactory::createInstance("Demo");
         $v->setData($m->toArray());
         $v->setData($request->getRouterArgs(1), 'arg_id');
         $v->setData($request->getRouterArgs(2), 'arg_name');

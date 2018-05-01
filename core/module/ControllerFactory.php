@@ -21,6 +21,7 @@ class ControllerFactory extends Factory
     /*
      * @var string 类名
      */
+    protected static $class_name = "ControllerFactory";
     protected $_class_name = "ControllerFactory";
     /**
      * @var array 实例集合
@@ -32,13 +33,12 @@ class ControllerFactory extends Factory
      * @param string $name
      * @return Controller
      */
-    public function  getInstance($name = "")
+    public static function getInstance($name = "")
     {
         // TODO: Implement getInstance() method.
         if (!isset(self::$instance[$name]) || !(self::$instance[$name] instanceof Controller)) {
-
             //记录实例
-            self::$instance[$name] = $this->createInstance($name);
+            self::$instance[$name] = self::createInstance($name);
         }
         return self::$instance[$name];
     }
@@ -48,7 +48,7 @@ class ControllerFactory extends Factory
      * @param string $name
      * @return Controller
      */
-    public function createInstance($name = "")
+    public static function createInstance($name = "")
     {
         //组合全称
         $full_name = "\\APP\\Controller\\" . $name . "Controller";

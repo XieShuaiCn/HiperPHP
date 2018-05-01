@@ -9,17 +9,18 @@
 namespace Core\Module;
 
 
-use \Core\Base\Cache;
-use \Core\Base\Factory;
-use \Core\Lib\CacheLocal;
-use \Core\Lib\CacheMemcache;
-use \Core\Lib\CacheRedis;
+use Core\Base\Cache;
+use Core\Base\Factory;
+use Core\Lib\CacheLocal;
+use Core\Lib\CacheMemcache;
+use Core\Lib\CacheRedis;
 
 class CacheFactory extends Factory
 {
     /*
      * @var string 类名
      */
+    protected static $class_name = "ControllerFactory";
     protected $_class_name = "ControllerFactory";
     /**
      * @var array 实例集合
@@ -31,7 +32,7 @@ class CacheFactory extends Factory
      * @param string $model
      * @return Cache
      */
-    public function getInstance($model = "default")
+    public static function getInstance($model = "default")
     {
         // TODO: Implement getInstance() method.
         $db_config = include CONFIG_ROOT . "/cache.config.php";
@@ -77,7 +78,7 @@ class CacheFactory extends Factory
     /**
      * @return void
      */
-    public function createInstance()
+    public static function createInstance()
     {
         // TODO: Implement createInstance() method.
         die('Can not create multiple cache instances. Use getInstance instead.');

@@ -21,6 +21,7 @@ class ModelFactory extends Factory
     /*
      * @var string 类名
      */
+    protected static $class_name = "ModelFactory";
     protected $_class_name = "ModelFactory";
     /**
      * @var array 实例集合
@@ -32,19 +33,12 @@ class ModelFactory extends Factory
      * @param string $name 模型名称
      * @return Model 返回模型
      */
-    public function getInstance($name = "")
+    public static function getInstance($name = "")
     {
         // TODO: Implement getInstance() method.
         if (!isset(self::$instance[$name]) || !(self::$instance[$name] instanceof Model)) {
-            //组合全称
-            $full_name = "\\APP\\Model\\" . $name . "Model";
-            try {
-                $model = new $full_name();
-            } catch (\Exception $e) {
-                die($e->getMessage());
-            }
             //记录实例
-            self::$instance[$name] = $model;
+            self::$instance[$name] = self::createInstance($name);
         }
         return self::$instance[$name];
     }
@@ -54,7 +48,7 @@ class ModelFactory extends Factory
      * @param string $name
      * @return Model
      */
-    public function createInstance($name = "")
+    public static function createInstance($name = "")
     {
         //组合全称
         $full_name = "\\APP\\Model\\" . $name . "Model";

@@ -21,6 +21,7 @@ class DaoFactory extends Factory
     /**
      * @var string 类名
      */
+    protected static $class_name = "DaoFactory";
     protected $_class_name = "DaoFactory";
 
     /**
@@ -33,19 +34,12 @@ class DaoFactory extends Factory
      * @param string $name
      * @return Dao
      */
-    public function  getInstance($name = "")
+    public static function getInstance($name = "")
     {
         // TODO: Implement getInstance() method.
         if (!isset(self::$instance[$name]) || !(self::$instance[$name] instanceof Dao)) {
-            //组合全称
-            $full_name = "\\APP\\Dao\\" . $name . "Dao";
-            try {
-                $dao = new $full_name();
-            } catch (\Exception $e) {
-                die($e->getMessage());
-            }
             //记录实例
-            self::$instance[$name] = $dao;
+            self::$instance[$name] = self::createInstance($name);
         }
         return self::$instance[$name];
     }
@@ -55,7 +49,7 @@ class DaoFactory extends Factory
      * @param string $name
      * @return Dao
      */
-    public function createInstance($name = "")
+    public static function createInstance($name = "")
     {
         //组合全称
         $full_name = "\\APP\\Dao\\" . $name . "Dao";

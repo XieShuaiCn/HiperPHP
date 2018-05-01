@@ -46,8 +46,7 @@ class DemoView extends View
         $cache_key = $this->_class_name
             . (isset($this->data['arg_id']) ? "_" . $this->data['arg_id'] : "")
             . (isset($this->data['arg_name']) ? "_" . $this->data['arg_name'] : "");
-        $f = new CacheFactory();
-        $cache = $f->getInstance('core');
+        $cache = CacheFactory::getInstance('core');
         if($html = $cache->getValue($cache_key)){
             $response->setContent($html);
             return;
