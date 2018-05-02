@@ -115,7 +115,7 @@ class CacheMemcache extends Cache
                     $cdump = $this->_memcache->getExtendedStats('cachedump', (int)$slabId);
                     foreach ($cdump AS $keys => $arrVal) {
                         foreach ($arrVal AS $k => $v) {
-                            array_push($list, $k);
+                            $list []= $k;
                         }
                     }
                 }
@@ -128,7 +128,7 @@ class CacheMemcache extends Cache
             $ret = [];
             foreach ($list as $l) {
                 if (preg_match($ptn, $l)) {
-                    array_push($ret, $l);
+                    $ret []= $l;
                 }
             }
             return $ret;

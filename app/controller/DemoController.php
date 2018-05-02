@@ -40,7 +40,7 @@ class DemoController extends Controller
         $m->load(1);
         $d = $m->toArray();
         $t = new \Core\Module\Template('index.tpl');
-        $t->assign('title', 'test—index');
+        $t->assign('title', 'test');
         $t->assign('content', '这个页面使用Template生成输出。');
         $t->display();
     }
