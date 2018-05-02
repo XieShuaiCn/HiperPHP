@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HiperPHP</title>
+    <title><{title}></title>
 </head>
 <body>
-HiperPHP：A High Performance PHP Framework.
+<[include header.tpl]>
+<{content}>
 </body>
 </html>

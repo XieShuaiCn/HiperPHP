@@ -199,6 +199,25 @@ class CacheRedis extends Cache
     }
 
     /**
+     * 获取所有键名
+     * @param string $pattern
+     */
+    public function getKeysAll($pattern = '*')
+    {
+        return $this->_redis->keys($pattern);
+    }
+
+    /**
+     * 是否存在某个键值
+     * @param $key
+     * @return bool
+     */
+    public function existKey($key)
+    {
+        return $this->_redis->exists($key);
+    }
+
+    /**
      * 设置hash值
      * @param $name string
      * @param $key string
@@ -234,15 +253,6 @@ class CacheRedis extends Cache
     }
 
     /**
-     * 获取所有键名
-     * @param string $pattern
-     */
-    public function getKeysAll($pattern = '*')
-    {
-        return $this->_redis->keys($pattern);
-    }
-
-    /**
      * 获取所有hash键名
      * @param string $name hash组名
      */
@@ -259,6 +269,22 @@ class CacheRedis extends Cache
     public function getHashAll($name)
     {
         return $this->_redis->hGetAll($name);
+    }
+
+    /**
+     * 是否存在某个hash键值，只判断组名请使用existKey
+     * @param string $name 组名
+     * @param string $key 键名
+     * @return bool
+     */
+    public function existHashKey($name, $key)
+    {
+        return $this->_redis->hExists($name, $key);
+    }
+
+    public function existHash($name)
+    {
+        return $this->existKey($name);
     }
 
     /**

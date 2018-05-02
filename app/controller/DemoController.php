@@ -9,6 +9,7 @@
 namespace App\Controller;
 
 use Core\Base\Controller;
+use Core\Module\BaseFunc\Template;
 use Core\Module\ModelFactory;
 use Core\Module\ViewFactory;
 
@@ -37,9 +38,11 @@ class DemoController extends Controller
     {
         $m = ModelFactory::createInstance("Demo");
         $m->load(1);
-        $v = ViewFactory::createInstance("Demo");
-        $v->setData($m->toArray());
-        $v->display($reponse);
+        $d = $m->toArray();
+        $t = new \Core\Module\Template('index.tpl');
+        $t->assign('title', 'test—index');
+        $t->assign('content', '这个页面使用Template生成输出。');
+        $t->display();
     }
 
     /**
@@ -49,7 +52,7 @@ class DemoController extends Controller
     {
         $m = ModelFactory::createInstance("Demo");
         $m->load(1);
-        $v = ModelFactory::createInstance("Demo");
+        $v = ViewFactory::createInstance("Demo");
         $v->setData($m->toArray());
         $v->setData($request->getRouterArgs(1), 'arg_name');
         $v->display($reponse);

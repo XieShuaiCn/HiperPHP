@@ -96,6 +96,59 @@ class CacheMemcache extends Cache
         return $this->_memcache->delete($key);
     }
 
+
+    /**
+     * 获取所有键名
+     * @param string $pattern 键名
+     * @return array
+     */
+    public function getKeysAll($pattern = '*')
+    {
+        $list = [];
+        $allSlabs = $this->_memcache->getExtendedStats('slabs');
+        //var_dump($allSlabs);
+        //$items = $this->_memcache->getExtendedStats('items');
+        //var_dump($items);
+        foreach ($allSlabs as $server => $slabs) {
+            foreach ($slabs AS $slabId => $slabMeta) {
+                if (is_numeric($slabId)) {//传参非int，会报警告
+                    $cdump = $this->_memcache->getExtendedStats('cachedump', (int)$slabId);
+                    foreach ($cdump AS $keys => $arrVal) {
+                        foreach ($arrVal AS $k => $v) {
+                            array_push($list, $k);
+                        }
+                    }
+                }
+            }
+        }
+        if ($pattern != null && $pattern != '*') {
+            $ptn = str_replace('*', '\w*?', $pattern);
+            $ptn = '/' . $ptn . '/';
+            var_dump($ptn);
+            $ret = [];
+            foreach ($list as $l) {
+                if (preg_match($ptn, $l)) {
+                    array_push($ret, $l);
+                }
+            }
+            return $ret;
+        }
+        return $list;
+        /* Valid values are {reset, malloc, maps, cachedump, slabs, items, sizes}.*/
+        //return $this->_memcache->getExtendedStats('cachedump', 2);
+    }
+
+    /**
+     * 是否存在某个键值对
+     * @param string $key
+     * @return bool
+     */
+    public function existKey($key)
+    {
+        // TODO: Implement existKey() method.
+        return $this->_memcache->get($key) !== false;
+    }
+
     /**
      * 获取hash键值
      * @param string $name 组名
@@ -132,54 +185,35 @@ class CacheMemcache extends Cache
     }
 
     /**
-     * 获取所有键名
-     * @param string $pattern 键名
-     * @return array
-     */
-    public function getKeysAll($pattern = '*')
-    {
-        $list = [];
-        $allSlabs = $this->_memcache->getExtendedStats('slabs');
-        //var_dump($allSlabs);
-        //$items = $this->_memcache->getExtendedStats('items');
-        //var_dump($items);
-        foreach ($allSlabs as $server => $slabs) {
-            foreach ($slabs AS $slabId => $slabMeta) {
-                if (is_numeric($slabId)) {//传参非int，会报警告
-                    $cdump = $this->_memcache->getExtendedStats('cachedump', (int)$slabId);
-                    foreach ($cdump AS $keys => $arrVal) {
-                        foreach ($arrVal AS $k => $v) {
-                            array_push($list, $k);
-                        }
-                    }
-                }
-            }
-        }
-        if ($pattern != null && $pattern != '*') {
-            $ptn = str_replace('*', '\w*?', $pattern);
-            $ptn = '/'.$ptn.'/';
-            var_dump($ptn);
-            $ret = [];
-            foreach ($list as $l){
-                if(preg_match($ptn, $l)){
-                    array_push($ret, $l);
-                }
-            }
-            return $ret;
-        }
-        return $list;
-        /* Valid values are {reset, malloc, maps, cachedump, slabs, items, sizes}.*/
-        //return $this->_memcache->getExtendedStats('cachedump', 2);
-    }
-
-    /**
      * 获取所有hash键名
      * @param string $name 组名
      * @return array
      */
     public function getHashKeysAll($name)
     {
-        return $this->getKeysAll($name.'_*');
+        return $this->getKeysAll($name . '_*');
+    }
+
+    /**
+     * 是否存在hash值
+     * @param string $name
+     * @param string $key
+     * @return bool
+     */
+    public function existHashKey($name, $key)
+    {
+        // TODO: Implement existHashKey() method.
+        return $this->existKey($name . '_' . $key);
+    }
+
+    /**
+     * 是否存在某个hash组
+     * @param string $name
+     * @return bool
+     */
+    public function existHash($name)
+    {
+        return count($this->getKeysAll($name.'_*')) > 0;
     }
 
     public function getLastError()

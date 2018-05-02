@@ -104,6 +104,45 @@ class CacheLocal extends Cache
     }
 
     /**
+     * 获取所有键名
+     * @param string $pattern
+     * @return array
+     */
+    public function getKeysAll($pattern = '*')
+    {
+        $list = scandir($this->path);
+        $ret = [];
+        if ($pattern != null && $pattern != '*') {
+            $ptn = str_replace('*', '\w*?', $pattern);
+            $ptn = '/' . $ptn . '/';
+            var_dump($ptn);
+            foreach ($list as $l) {
+                if (substr($l, -4) == '.tmp' && preg_match($ptn, $l)) {
+                    $ret [] = $l;
+                }
+            }
+        } else {
+            foreach ($list as $l) {
+                if (substr($l, -4) == '.tmp') {
+                    $ret [] = $l;
+                }
+            }
+        }
+        return $ret;
+    }
+
+    /**
+     * 是否存在某个键值
+     * @param string $key
+     * @return bool
+     */
+    public function existKey($key)
+    {
+        // TODO: Implement existKey() method.
+        return is_file($this->path . '/' . $key . '.tmp');
+    }
+
+    /**
      * 获取hash键值
      * @param $name
      * @param $key
@@ -143,39 +182,33 @@ class CacheLocal extends Cache
 
     /**
      * 获取所有键名
-     * @param string $pattern
-     * @return array
-     */
-    public function getKeysAll($pattern = '*')
-    {
-        $list = scandir($this->path);
-        $ret = [];
-        if ($pattern != null && $pattern != '*') {
-            $ptn = str_replace('*', '\w*?', $pattern);
-            $ptn = '/' . $ptn . '/';
-            var_dump($ptn);
-            foreach ($list as $l) {
-                if (substr($l, -4) == '.tmp' && preg_match($ptn, $l)) {
-                    array_push($ret, $l);
-                }
-            }
-        } else {
-            foreach ($list as $l) {
-                if (substr($l, -4) == '.tmp') {
-                    array_push($ret, $l);
-                }
-            }
-        }
-        return $ret;
-    }
-
-    /**
-     * 获取所有键名
      * @param string $name
      * @return array
      */
     public function getHashKeysAll($name)
     {
         return $this->getKeysAll($name . "_*");
+    }
+
+    /**
+     * 是否存在某个hash键值
+     * @param string $name
+     * @param string $key
+     * @return bool
+     */
+    public function existHashKey($name, $key)
+    {
+        // TODO: Implement existHashKey() method.
+        return $this->existKey($name . '_' . $key);
+    }
+
+    /**
+     * 是否存在某个hash组
+     * @param string $name 组名
+     * @return bool
+     */
+    public function existHash($name)
+    {
+        return count($this->getHashKeysAll($name)) > 0;
     }
 }
