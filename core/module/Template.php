@@ -143,8 +143,11 @@ class Template
                 $tpl_content, $reg_matches);
             if ($reg_ret != false) {
                 //记录嵌套模板信息
-                for ($i = 1; $i < count($reg_matches); ++$i) {
-                    $this->tpl_include_files [] = ['file_tpl' => $reg_matches[$i][0]];
+                for ($i = 0; $i < $reg_ret; ++$i) {
+                    $this->tpl_include_files [] = [
+                        'tpl_string' => $reg_matches[0][$i],//模板匹配的字符串
+                        'file_tpl' => $reg_matches[1][$i]//捕获分组1的字符串
+                    ];
                 }
                 //将模板嵌套的分析结果存入缓存
                 $this->cache->setHashValue($this->tpl_cache_name, 'include_files', $this->tpl_include_files);
@@ -165,10 +168,10 @@ class Template
         }
         //开始预编译模板
         if (!$cached) {
-            //编译模板变量
+            /*//编译模板变量,此操作放在控制分析时解决
             $tpl_content = preg_replace(
                 '/' . $this->tpl_begin . '\[var.(\w+?)\]' . $this->tpl_end . '/',
-                '<?=$this->data["\1"]?>', $tpl_content);
+                '<?=$this->data["\1"]?>', $tpl_content);*/
             //编译模板变量的简单写法
             $tpl_content = preg_replace(
                 '/' . $this->tpl_begin . '\{(\w+?)\}' . $this->tpl_end . '/',
@@ -176,75 +179,15 @@ class Template
             //编译模板嵌套
             foreach ($this->tpl_include_files as $f) {
                 $tpl_content = str_replace(
-                    $this->tpl_begin . "[include " . $f['file_tpl'] . "]" . $this->tpl_end,
-                    '<?php include "' . $f['file_tmp'] . '"; ?>', $tpl_content);
+                    $f['tpl_string'],
+                    '<?php include "' . $f['file_tmp'] . '"; ?>',
+                    $tpl_content);
             }
             //编译逻辑控制语句
+            $tsm = new TemplateStateMachine();
             $tpl_content = preg_replace_callback(
-                '/' . $this->tpl_begin . '\[(\w+?)((?:\s+[\w\W]+?)*)\]' . $this->tpl_end . '/',
-                function ($matches) {
-                    $matches[1] = strtolower($matches[1]);
-                    $rpl_value = '';
-                    switch ($matches[1]) {
-                        case 'for':
-                            if (!isset($matches[2])) {//没有参数时为死循环
-                                $rpl_value = '<?php for ($row=0; ; ++$row) { ?>';
-                            } //解析for范围
-                            elseif (preg_match('/\s*(var\.)?(\w+)\s*to\s*(var\.)?(\w+)\s*/', $matches[2], $sub_matches)) {
-                                //var_dump($sub_matches);
-                                $rpl_value = '<?php '
-                                    . 'for ($row=' . (empty(trim($sub_matches[1])) ? $sub_matches[2] : '$this->data[\'' . $sub_matches[2] . '\']') . '; '
-                                    . '$row<=' . (empty(trim($sub_matches[3])) ? $sub_matches[4] : '$this->data[\'' . $sub_matches[4] . '\']') . '; '
-                                    . '++$row){ ?>';
-                            } //解析为foreach遍历
-                            elseif (preg_match('/\s*var.(\w+)\s*/', $matches[2], $sub_matches)) {
-                                $rpl_value = '<?php foreach ($this->data[\'' . $sub_matches[1] . '\'] as $row) {?>';
-                            }
-                            break;
-                        case 'if':
-                            if (!isset($matches[2])) {
-                                $rpl_value = '<?php if(false){ ?>';
-                            } elseif (preg_match('/\s*(var\.)?(\w+)\s*(([\w\W]+?)\s*(var\.)?(\'?"?\w+\'?"?)\s*)?/', $matches[2], $sub_matches)) {
-                                //var_dump($sub_matches);
-                                //单变量if
-                                if (!isset($sub_matches[3]) || empty(trim($sub_matches[3]))) {
-                                    $rpl_value = '<?php if ('
-                                        . (empty(trim($sub_matches[1])) ?//判断是否为变量
-                                            ($sub_matches[2] == 'row' ? '$row' : $sub_matches[2]) ://判断是否为row
-                                            '$this->data[\'' . $sub_matches[2] . '\']')
-                                        . ') { ?>';
-                                } //条件if
-                                else {
-                                    $rpl_value = '<?php if ('
-                                        . (empty(trim($sub_matches[1])) ?
-                                            ($sub_matches[2] == 'row' ? '$row' : $sub_matches[2]) ://判断是否为row
-                                            '$this->data[\'' . $sub_matches[2] . '\']')
-                                        . $sub_matches[4]
-                                        . (empty(trim($sub_matches[5])) ?
-                                            ($sub_matches[6] == 'row' ? '$row' : $sub_matches[6]) ://判断是否为row
-                                            '$this->data[\'' . $sub_matches[6] . '\']')
-                                        . ') { ?>';
-                                }
-                            }
-                            break;
-                        case 'row':
-                            $rpl_value = '<?=$row?>';
-                            break;
-                        case 'endfor':
-                        case 'endif':
-                            $rpl_value = '<?php }?>';
-                            break;
-                        case 'break':
-                            $rpl_value = '<?php break;?>';
-                            break;
-                        case 'continue':
-                            $rpl_value = '<?php continue;?>';
-                            break;
-                        default:
-                            break;
-                    }
-                    return $rpl_value;
-                }, $tpl_content);
+                '/' . $this->tpl_begin . '\[(\S+?)((?:\s+[\w\W]+?)*)\]' . $this->tpl_end . '/',
+                [$tsm, 'analysisPreg'], $tpl_content);
             file_put_contents($this->tpl_tmp_file, $tpl_content);
         }
         return true;
@@ -261,5 +204,211 @@ class Template
         } catch (\Exception $e) {
 
         }
+    }
+}
+
+/**
+ * 模板状态机类，用于解析模板
+ * Class TemplateStateMachine
+ * @package Core\Module
+ */
+class TemplateStateMachine
+{
+    /**
+     * 状态码
+     */
+    const STATE_UNKNOWN = -1;
+    const STATE_NORMAL = 0;
+    const STATE_IF = 1;
+    const STATE_IF_ELIF = 2;
+    const STATE_IF_ELSE = 3;
+    const STATE_CONTINUE = 4;
+    const STATE_BREAK = 5;
+    const STATE_FOR = 6;
+
+    /**
+     * @var array 状态栈
+     */
+    private $state = [self::STATE_NORMAL];
+    /**
+     * @var array 局部变量
+     */
+    private $variable = [];
+
+    /**
+     * 判断模板的语法是否规则合法
+     * @return bool
+     */
+    public function isRegular()
+    {
+        return count($this->state) === 1 && $this->state[0] === self::STATE_NORMAL;
+    }
+
+    /**
+     * 分析正则结果，用作正则的回调函数
+     * @param array $matches
+     * @return string
+     */
+    public function analysisPreg($matches)
+    {
+        $current = end($this->state);
+        $new_state = self::STATE_UNKNOWN;
+        //取出两端空白，统一小写
+        $matches[1] = strtolower(trim($matches[1]));
+        $rpl_value = '';
+        switch ($matches[1]) {
+            case 'foreach':
+            case 'while':
+            case 'for':
+                $condition = $this->getFor(isset($matches[2]) ? $matches[2] : null);
+                $rpl_value = '<?php ' . $condition . ' {?>';
+                $this->state[] = self::STATE_FOR;
+                break;
+            case 'if':
+                $condition = $this->getIfCondition(isset($matches[2]) ? $matches[2] : null);
+                $rpl_value = '<?php if (' . $condition . ') {?>';
+                $this->state[] = self::STATE_IF;
+                break;
+            case 'elseif':
+                if ($current === self::STATE_IF ||
+                    $current === self::STATE_IF_ELIF) {
+                    //分析if条件
+                    $condition = $this->getIfCondition(isset($matches[2]) ? $matches[2] : null);
+                    $rpl_value = '<?php } elseif (' . $condition . ') {?>';
+                    $this->state[count($this->state) - 1] = self::STATE_IF_ELIF;
+                }
+                break;
+            case 'else':
+                if ($current == self::STATE_IF ||
+                    $current == self::STATE_IF_ELIF) {
+                    $rpl_value = '<?php } else { ?>';
+                    $this->state[count($this->state) - 1] = self::STATE_IF_ELSE;
+                }
+                break;
+            case 'endfor':
+                //var_dump($this->state);
+                if ($current === self::STATE_FOR) {
+                    $rpl_value = '<?php }?>';
+                    array_pop($this->state);
+                }
+                break;
+            case 'endif':
+                //var_dump($this->state);
+                if ($current === self::STATE_IF ||
+                    $current === self::STATE_IF_ELIF ||
+                    $current === self::STATE_IF_ELSE) {
+                    $rpl_value = '<?php }?>';
+                    array_pop($this->state);
+                }
+                break;
+            case 'break':
+                $rpl_value = '<?php break;?>';
+                break;
+            case 'continue':
+                $rpl_value = '<?php continue;?>';
+                break;
+            default:
+                //变量
+                if (strpos($matches[1], 'var.') === 0) {
+                    $rpl_value = '<?=' . $this->getVariableString($matches[1]) . '?>';
+                }
+                break;
+        }
+        return $rpl_value;
+    }
+
+    /**
+     * 根据条件字符串构造for语句
+     * @param string $str_condition for的条件字符串
+     * @return string
+     */
+    protected function getFor($str_condition)
+    {
+        if (empty($str_condition)) {//没有参数时为死循环
+            $condition = 'for ( ; ; )';
+        } //解析for范围，v in 1 to 99 | v in arr | arr as v
+        elseif (preg_match('/\s*([\w\.\'"]+)\s*(in|as)\s*([\w\.\'"]+)\s*(to\s*([\w\.\'"]+)\s*)?/', $str_condition, $sub_matches)) {
+            //var_dump($sub_matches);
+            //注册新变量
+            if ($sub_matches[2] == 'in') {
+                if(in_array($sub_matches[1], $this->variable)) {
+                    $this->variable[] = $sub_matches[1];
+                }
+                if (isset($sub_matches[5])) {//v in 1 to 99
+                    $condition = 'for ($' . $sub_matches[1] . '=' . $this->getVariableString($sub_matches[3])
+                        . ';$' . $sub_matches[1] . '<=' . $this->getVariableString($sub_matches[5])
+                        . ';++$' . $sub_matches[1] . ')';
+                } else {//v in arr
+                    $condition = 'foreach (' . $this->getVariableString($sub_matches[3]) . ' as $' . $sub_matches[1] . ')';
+                }
+            } else {//arr as v
+                if(in_array($sub_matches[3], $this->variable)) {
+                    $this->variable[] = $sub_matches[3];
+                }
+                $condition = 'foreach (' . $this->getVariableString($sub_matches[1]) . ' as $' . $sub_matches[3] . ')';
+            }
+        }//无法解析，原样返回
+        else {
+            $condition = 'for (' . $str_condition . ')';
+        }
+        return $condition;
+    }
+
+    /**
+     * 根据if的条件字符串构造if条件字符串的php格式
+     * @param string $str_condition if的条件字符串
+     * @return string
+     */
+    protected function getIfCondition($str_condition)
+    {
+        $condition = '';
+        if (empty($str_condition)) {
+            $condition = 'true';
+        } elseif (preg_match('/\s*([\w\.\'"]+)\s*(?:([\w\W]+?)\s*([\w\.\'"]+)\s*)?/',
+            $str_condition, $sub_matches)) {
+            //var_dump($sub_matches);
+            $arg1_arg = $this->getVariableString($sub_matches[1]);
+            //单变量if
+            if (!isset($sub_matches[2])) {
+                $condition = $arg1_arg;
+            } //条件if
+            else {
+                $arg2_arg = $this->getVariableString($sub_matches[3]);
+                $condition = $arg1_arg . $sub_matches[2] . $arg2_arg;
+            }
+        } else {
+            $condition = $str_condition;
+        }
+        return $condition;
+    }
+
+    /**
+     * 构造变量的php字符串
+     * @param string $arg_str 变量表达
+     * @return string
+     */
+    protected function getVariableString($arg_str)
+    {
+        $arg1 = explode('.', $arg_str);
+        if ($arg1[0] == 'var') {
+            //var_dump($arg1, $this->variable);
+            if (isset($arg1[1])) {
+                //模板局部变量
+                if (in_array($arg1[1], $this->variable, true)) {
+                    //组合变量访问形式，也可能是数组
+                    $arg_str = '$' . $arg1[1];
+                } //控制器传参来的变量
+                else {
+                    $arg_str = '$this->data[\'' . $arg1[1] . '\']';
+                }
+                //若访问的是数组，继续加[]
+                for ($i = 2; $i < count($arg1); ++$i) {
+                    $arg_str .= '[\'' . $arg1[1] . '\']';
+                }
+            }
+        } else {//加单引号，数字和布尔变字符串后也能使用
+            $arg_str = "'" . $arg1[0] . "'";
+        }
+        return $arg_str;
     }
 }
