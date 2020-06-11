@@ -1,5 +1,6 @@
 /.git/
 /.idea/
 /temp/
+/cache/
 /web/info.php
 /web/server.php
